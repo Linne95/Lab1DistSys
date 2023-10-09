@@ -1,24 +1,14 @@
 package com.example.project;
 
-import java.sql.*;
+import java.util.ArrayList;
+import java.util.Calendar;
 
-public class DatabaseQuery {
+public class DBItemManager {
 
-    // JDBC URL, username, and password of MySQL server
-    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/test_schema"; // Update with your database URL
-    private static final String DB_USER = "root"; // Update with your database username
-    private static final String DB_PASSWORD = "admin"; // Update with your database password
-
-    public static String getAnswerForName(String name) {
+    /*public static String getAnswerForName(String name) {
         String answer = null;
 
         try {
-            // Load the MySQL JDBC driver
-            Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-
-            // Establish a connection to the database
-            Connection connection = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASSWORD);
-
             // SQL query to retrieve the answer based on the provided name
             String sql = "SELECT status FROM test WHERE successful = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -56,5 +46,21 @@ public class DatabaseQuery {
             System.out.println("No answer found for '" + nameToQuery + "'.");
         }
         return "Hello";
+    }*/
+
+    public static boolean addUser(String username, String password) {
+        return DatabaseManager.addUserToDatabase(username, password);
+    }
+
+    public static ArrayList<String[]> logIn(String username, String password){
+        return DatabaseManager.logIn(username, password);
+    }
+
+    public static ArrayList<String[]> getProducts() {
+        return DatabaseManager.getProducts();
+    }
+
+    public static boolean addItemToCart(String username, String password, int itemId){
+        return DatabaseManager.addToUserCart(username, password, itemId);
     }
 }
