@@ -27,23 +27,12 @@ public class ControllerServlet extends HttpServlet {
 
                 // Print the product information to the console
                 System.out.println("user: " + username + " , password: " + password);
-                ArrayList<String[]> returnedUsersCart = DBItemManager.logIn(username, password);
+                boolean correctLogIn = DBItemManager.logIn(username, password);
 
-                if (returnedUsersCart == null || returnedUsersCart.equals("null")) {
-                    response.sendRedirect("http://localhost:8080/Project_war_exploded/index.jsp");
-                    session.setAttribute("invalidLogin", true);
-                }
-                else {
+                if (correctLogIn) {
                     session.setAttribute("sessionUsername", username);
                     session.setAttribute("sessionPassword", password);
                     session.setAttribute("loggedIn", true);
-
-                    String[][] currentUsersCart = new String[returnedUsersCart.size()][];
-                    for (int i = 0; i < returnedUsersCart.size(); i++) {
-                        currentUsersCart[i] = returnedUsersCart.get(i);
-                    }
-
-                    session.setAttribute("userCart", currentUsersCart);
 
                     ArrayList<String[]> fetchedProducts = DBItemManager.getProducts();
 
@@ -55,6 +44,10 @@ public class ControllerServlet extends HttpServlet {
                     session.setAttribute("productList", string2DArray);
                     // Redirect back to the index.jsp page
                     response.sendRedirect("http://localhost:8080/Project_war_exploded/shop.jsp");
+                }
+                else {
+                    response.sendRedirect("http://localhost:8080/Project_war_exploded/index.jsp");
+                    session.setAttribute("invalidLogin", true);
                 }
             break;
             case ("signUp"):
@@ -82,6 +75,16 @@ public class ControllerServlet extends HttpServlet {
                 response.sendRedirect("http://localhost:8080/Project_war_exploded/index.jsp");
             break;
             case ("shoppingCart"):
+
+                ArrayList<String[]> returnedUsersCart = DBItemManager.getShoppingCart((String) session.getAttribute("sessionUsername"));
+
+                String[][] currentUsersCart = new String[returnedUsersCart.size()][];
+                for (int i = 0; i < returnedUsersCart.size(); i++) {
+                    currentUsersCart[i] = returnedUsersCart.get(i);
+                }
+
+                session.setAttribute("userCart", currentUsersCart);
+
                 // Redirect back to the index.jsp page
                 response.sendRedirect("http://localhost:8080/Project_war_exploded/shoppingCart.jsp");
             break;
@@ -89,10 +92,10 @@ public class ControllerServlet extends HttpServlet {
                 // Print the product information to the console
                 System.out.println("You have added: " + request.getParameter("nutName"));
                 int itemId = Integer.parseInt(request.getParameter("nutId"));
-                String itemName = request.getParameter("nutName");
-                String itemPrice = request.getParameter("nutPrice");
 
-                DBItemManager.addItemToCart((String) session.getAttribute("sessionUsername"), (String) session.getAttribute("sessionPassword"), itemId);
+                if(DBItemManager.authenticateUser((String) session.getAttribute("sessionUsername"), (String) session.getAttribute("sessionPassword"))) {
+                    DBItemManager.addItemToCart((String) session.getAttribute("sessionUsername"), (String) session.getAttribute("sessionPassword"), itemId);
+                }
 
                 response.sendRedirect("http://localhost:8080/Project_war_exploded/shop.jsp");
             break;

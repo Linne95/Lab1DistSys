@@ -52,7 +52,7 @@ public class DBItemManager {
         return DatabaseManager.addUserToDatabase(username, password);
     }
 
-    public static ArrayList<String[]> logIn(String username, String password){
+    public static boolean logIn(String username, String password){
         return DatabaseManager.logIn(username, password);
     }
 
@@ -62,5 +62,13 @@ public class DBItemManager {
 
     public static boolean addItemToCart(String username, String password, int itemId){
         return DatabaseManager.addToUserCart(username, password, itemId);
+    }
+
+    public static ArrayList<String[]> getShoppingCart(String username){
+        return DatabaseManager.getShoppingCart(username);
+    }
+
+    public static boolean authenticateUser(String username, String password){
+        return DatabaseManager.authenticateUser(username, password);
     }
 }

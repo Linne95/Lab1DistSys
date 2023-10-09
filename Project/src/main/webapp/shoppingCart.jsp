@@ -21,7 +21,7 @@
         String[][] dataList = (String[][]) session.getAttribute("userCart");
         for (String[] element : dataList) {
     %>
-    <li><%= element[1] + ": " + element[2] + "kr" %></li>
+    <li><%= element[3] + " x " + element[1] + ": " + element[2] + "kr/st" %></li>
     <%
         }
     %>

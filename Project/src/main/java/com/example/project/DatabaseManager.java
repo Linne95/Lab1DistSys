@@ -12,9 +12,9 @@ public class DatabaseManager {
     private static final String JDBC_USER_URL = "jdbc:mysql://localhost:3306/users_schema"; // Update with your database URL
     private static final String DB_USER = "root"; // Update with your database username
     private static final String DB_PASSWORD = "admin"; // Update with your database password
-    private static final Connection connection = bob();
+    private static final Connection connection = startConnection();
 
-    private static Connection bob(){
+    private static Connection startConnection(){
         try {
             // Load the MySQL JDBC driver
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
@@ -51,7 +51,7 @@ public class DatabaseManager {
         return false;
     }
 
-    public static ArrayList<String[]> logIn(String loginUsername, String password) {
+    public static boolean logIn(String loginUsername, String password) {
         String sql = "SELECT pswrd FROM users WHERE username = ?";
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -63,18 +63,18 @@ public class DatabaseManager {
                     String storedPassword = resultSet.getString("pswrd");
                     // Compare the provided password with the stored password
                     if(storedPassword.equals(password)) {
-                        return getShoppingCart(loginUsername);
+                        return true;
                     }
                 }
             }
         } catch (SQLException e) {
             System.out.println(e);
         }
-        return null; // Return false if there's an error or no matching user found
+        return false; // Return false if there's an error or no matching user found
     }
 
-    private static ArrayList<String[]> getShoppingCart(String username){
-        String sql = "SELECT uc.itemId, i.itemName, i.price " +
+    public static ArrayList<String[]> getShoppingCart(String username){
+        String sql = "SELECT uc.itemId, i.itemName, i.price, uc.quantity " +
                      "FROM userscart uc " +
                      "INNER JOIN items i ON uc.itemId = i.itemId " +
                      "WHERE uc.username = ?";
@@ -86,10 +86,12 @@ public class DatabaseManager {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 ArrayList<String[]> cart = new ArrayList<>();
                 while (resultSet.next()) {
-                    String[] tempArray = new String[3];
+                    String[] tempArray = new String[4];
                     tempArray[0] = resultSet.getString("itemId");
                     tempArray[1] = resultSet.getString("itemName");
                     tempArray[2] = resultSet.getString("price");
+                    tempArray[3] = resultSet.getString("quantity");
+                    System.out.println("temp array 3: " + tempArray[3]);
                     cart.add(tempArray);
                 }
                 return cart;
@@ -124,7 +126,9 @@ public class DatabaseManager {
 
     public static boolean addToUserCart(String username, String password, int itemId){
         try {
-            String sql = "INSERT INTO userscart (userName, itemId) VALUES (?, ?)";
+            String sql = "INSERT INTO userscart (username, itemId, quantity)" +
+                         "VALUES (?, ?, 1)" +
+                         "ON DUPLICATE KEY UPDATE quantity = quantity + 1;";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, username); // Replace username with the actual username
             preparedStatement.setInt(2, itemId); // Replace password with the actual password
@@ -142,5 +146,26 @@ public class DatabaseManager {
             //throw new RuntimeException(e);
         }
         return false;
+    }
+
+    public static boolean authenticateUser(String username, String password){
+        String sql = "SELECT COUNT(*) FROM users WHERE username = ? AND pswrd = ?;";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                System.out.println("bra");
+                if(resultSet.next()){
+                    if(resultSet.getInt(1) == 1){
+                        return true;
+                    }
+                }
+                return false;
+            }
+        } catch (SQLException e) {
+            System.out.println("fel fel fel: " + e);
+        }
+        return false; // Return false if there's an error or no matching user found
     }
 }
