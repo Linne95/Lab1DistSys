@@ -22,6 +22,7 @@ public class DBItem extends com.example.project.bo.Item{
                 double price = resultSet.getDouble("price");
                 returnedProducts.addElement(new DBItem(id, name, price));
             }
+            preparedStatement.close();
             return returnedProducts;
         } catch (SQLException e) {
             System.out.println(e);

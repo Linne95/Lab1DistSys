@@ -32,6 +32,7 @@ public class DBCart extends com.example.project.bo.Cart{
                 int quantity = resultSet.getInt("quantity");
                 fetchedCart.addElement(new DBCart(id, name, price, quantity));
             }
+            preparedStatement.close();
             return fetchedCart;
         } catch (SQLException e) {
             System.out.println(e);
@@ -57,6 +58,7 @@ public class DBCart extends com.example.project.bo.Cart{
 
             int rowsAffected = preparedStatement.executeUpdate();
 
+            preparedStatement.close();
             if (rowsAffected > 0) {
                 return true;
             } else {
@@ -92,6 +94,7 @@ public class DBCart extends com.example.project.bo.Cart{
 
             int rowsAffected = preparedStatement.executeUpdate();
 
+            preparedStatement.close();
             if (rowsAffected > 0) {
                 return true;
             } else {

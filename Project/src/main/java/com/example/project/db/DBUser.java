@@ -74,9 +74,11 @@ public class DBUser extends com.example.project.bo.User{
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if(resultSet.next()){
                     if(resultSet.getInt(1) == 1){
+                        preparedStatement.close();
                         return true;
                     }
                 }
+                preparedStatement.close();
                 return false;
             }
         } catch (SQLException e) {
