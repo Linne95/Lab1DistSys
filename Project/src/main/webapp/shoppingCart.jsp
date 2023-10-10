@@ -1,4 +1,7 @@
-<%--
+<%@ page import="com.example.project.ui.CartInfo" %>
+<%@ page import="java.util.Collection" %>
+<%@ page import="java.util.Iterator" %>
+<%@ page import="com.example.project.bo.Cart" %><%--
   Created by IntelliJ IDEA.
   User: timd0
   Date: 2023-10-06
@@ -18,10 +21,18 @@
 </form>
 <ul>
     <%
-        String[][] dataList = (String[][]) session.getAttribute("userCart");
-        for (String[] element : dataList) {
+        Collection<CartInfo> dataList = (Collection<CartInfo>) session.getAttribute("userCart");
+        Iterator<CartInfo> it = dataList.iterator();
+        for (; it.hasNext();) {
+            CartInfo item = it.next();
     %>
-    <li><%= element[3] + " x " + element[1] + ": " + element[2] + "kr/st" %></li>
+    <li><%= item.getQuantity() + " x " + item.getItemName() + ": " + item.getPrice() + "kr/st" %></li>
+    <form action="ControllerServlet" method="get">
+        <input type="hidden" name="path" value="removeFromCart">
+        <input type="hidden" name="qt" value="<%=item.getQuantity()%>">
+        <input type="hidden" name="nutId" value="<%=item.getNutId()%>">
+        <input type="submit" value="Remove from Cart">
+    </form>
     <%
         }
     %>

@@ -1,4 +1,7 @@
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Collection" %>
+<%@ page import="com.example.project.ui.ItemInfo" %>
+<%@ page import="java.util.Iterator" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -29,14 +32,16 @@
 
     <ul>
         <%
-            String[][] dataList = (String[][]) session.getAttribute("productList");
-            for (String[] element : dataList) {
+            Collection<ItemInfo> dataList = (Collection<ItemInfo>) session.getAttribute("productList");
+            Iterator<ItemInfo> it = dataList.iterator();
+            for (; it.hasNext();) {
+                ItemInfo item = it.next();
         %>
-        <li><%= element[1] + ": " + element[2] + "kr" %></li>
+        <li><%= item.getName() + ": " + item.getPrice() + "kr" %></li>
         <form action="ControllerServlet" method="get">
-            <input type="hidden" name="nutId" value="<%=element[0]%>">
-            <input type="hidden" name="nutName" value="<%=element[1]%>">
-            <input type="hidden" name="nutPrice" value="<%=element[2]%>">
+            <input type="hidden" name="nutId" value="<%=item.getId()%>">
+            <input type="hidden" name="nutName" value="<%=item.getName()%>">
+            <input type="hidden" name="nutPrice" value="<%=item.getPrice()%>">
             <input type="hidden" name="path" value="addToCart">
             <input type="submit" value="Add to Cart">
         </form>

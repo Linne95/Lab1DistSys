@@ -1,5 +1,8 @@
-package com.example.project;
+package com.example.project.ui;
 
+import com.example.project.bo.CartHandler;
+import com.example.project.bo.ItemHandler;
+import com.example.project.bo.UserHandler;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,33 +19,18 @@ public class ControllerServlet extends HttpServlet {
         String username;
         String password;
         HttpSession session = request.getSession();
-        //session.setAttribute("loggedIn", false);
-        //session.setAttribute("invalidLogin", false);
         switch (request.getParameter("path")) {
             case ("logIn"):
-                // Retrieve item details from the form
                 username = request.getParameter("username");
                 password = request.getParameter("password");
                 session.setAttribute("invalidLogin", false);
 
-                // Print the product information to the console
-                System.out.println("user: " + username + " , password: " + password);
-                boolean correctLogIn = DBItemManager.logIn(username, password);
-
-                if (correctLogIn) {
+                if (UserHandler.logIn(username, password)) {
                     session.setAttribute("sessionUsername", username);
                     session.setAttribute("sessionPassword", password);
                     session.setAttribute("loggedIn", true);
-
-                    ArrayList<String[]> fetchedProducts = DBItemManager.getProducts();
-
-                    String[][] string2DArray = new String[fetchedProducts.size()][];
-                    for (int i = 0; i < fetchedProducts.size(); i++) {
-                        string2DArray[i] = fetchedProducts.get(i);
-                    }
-
-                    session.setAttribute("productList", string2DArray);
-                    // Redirect back to the index.jsp page
+                    ArrayList<ItemInfo> fetchedProducts = (ArrayList<ItemInfo>) ItemHandler.getItems();
+                    session.setAttribute("productList", fetchedProducts);
                     response.sendRedirect("http://localhost:8080/Project_war_exploded/shop.jsp");
                 }
                 else {
@@ -51,19 +39,17 @@ public class ControllerServlet extends HttpServlet {
                 }
             break;
             case ("signUp"):
-                // Retrieve item details from the form
                 username = request.getParameter("username");
                 password = request.getParameter("password");
                 session.setAttribute("nameTaken", false);
-                // Print the product information to the console
-                System.out.println("Sign up: user:: " + username + " , password: " + password);
-                if(DBItemManager.addUser(username, password)){
+                if(UserHandler.singUp(username, password)){
+                    ArrayList<ItemInfo> fetchedProducts = (ArrayList<ItemInfo>) ItemHandler.getItems();
+                    session.setAttribute("productList", fetchedProducts);
                     session.setAttribute("sessionUsername", username);
                     session.setAttribute("sessionPassword", password);
                     session.setAttribute("loggedIn", true);
                     response.sendRedirect("http://localhost:8080/Project_war_exploded/shop.jsp");
                 }else {
-                    // Redirect back to the index.jsp page
                     session.setAttribute("nameTaken", true);
                     response.sendRedirect("http://localhost:8080/Project_war_exploded/index.jsp");
                 }
@@ -75,29 +61,20 @@ public class ControllerServlet extends HttpServlet {
                 response.sendRedirect("http://localhost:8080/Project_war_exploded/index.jsp");
             break;
             case ("shoppingCart"):
-
-                ArrayList<String[]> returnedUsersCart = DBItemManager.getShoppingCart((String) session.getAttribute("sessionUsername"));
-
-                String[][] currentUsersCart = new String[returnedUsersCart.size()][];
-                for (int i = 0; i < returnedUsersCart.size(); i++) {
-                    currentUsersCart[i] = returnedUsersCart.get(i);
-                }
-
-                session.setAttribute("userCart", currentUsersCart);
-
-                // Redirect back to the index.jsp page
+                ArrayList<CartInfo> returnedUsersCart = (ArrayList<CartInfo>) CartHandler.getShoppingCart((String) session.getAttribute("sessionUsername"));
+                session.setAttribute("userCart", returnedUsersCart);
                 response.sendRedirect("http://localhost:8080/Project_war_exploded/shoppingCart.jsp");
             break;
             case ("addToCart"):
-                // Print the product information to the console
-                System.out.println("You have added: " + request.getParameter("nutName"));
                 int itemId = Integer.parseInt(request.getParameter("nutId"));
-
-                if(DBItemManager.authenticateUser((String) session.getAttribute("sessionUsername"), (String) session.getAttribute("sessionPassword"))) {
-                    DBItemManager.addItemToCart((String) session.getAttribute("sessionUsername"), (String) session.getAttribute("sessionPassword"), itemId);
+                if(UserHandler.authenticateUser((String) session.getAttribute("sessionUsername"), (String) session.getAttribute("sessionPassword"))) {
+                    CartHandler.addItemToCart((String) session.getAttribute("sessionUsername"), (String) session.getAttribute("sessionPassword"), itemId);
                 }
-
                 response.sendRedirect("http://localhost:8080/Project_war_exploded/shop.jsp");
+            break;
+            case ("removeFromCart"):
+                CartHandler.removeItemFromCart((String) session.getAttribute("sessionUsername"),Integer.parseInt(request.getParameter("qt")), Integer.parseInt(request.getParameter("nutId")));
+                response.sendRedirect("http://localhost:8080/Project_war_exploded/shoppingCart.jsp");
             break;
             case ("backToShop"):
                 response.sendRedirect("http://localhost:8080/Project_war_exploded/shop.jsp");
